@@ -1,0 +1,143 @@
+{
+  "lastSaved": "2021-04-20T00:00:00.000Z",
+  "schedule": {
+    "title": "20242-Ramadan",
+    "items": [
+      {
+        "uid": "7ba4e4d0-fdc5-40aa-9492-4b3c91797f8b",
+        "type": "Course",
+        "title": "SELECTED TOPICS IN COMPUTER SYSTEMS ENGINEERING",
+        "meetingTimes": [
+          {
+            "uid": "9489572b-533c-4162-bfbe-cf3fa45921f6",
+            "courseType": "",
+            "instructor": "",
+            "location": "ENG-105",
+            "startHour": 9,
+            "endHour": 10,
+            "startMinute": 50,
+            "endMinute": 30,
+            "days": {
+              "monday": false,
+              "tuesday": true,
+              "wednesday": false,
+              "thursday": true,
+              "friday": false,
+              "saturday": false,
+              "sunday": true
+            }
+          }
+        ],
+        "backgroundColor": "#FFE37D"
+      },
+      {
+        "uid": "49fd84e8-d8d8-45e6-8a87-bb8adff10661",
+        "type": "Course",
+        "title": "PARALLEL AND DISTRIBUTED PROCESSING",
+        "meetingTimes": [
+          {
+            "uid": "9489572b-533c-4162-bfbe-cf3fa45921f6",
+            "courseType": "",
+            "instructor": "Hussein Younis",
+            "location": "EIT-208",
+            "startHour": 11,
+            "endHour": 12,
+            "startMinute": 30,
+            "endMinute": 10,
+            "days": {
+              "monday": false,
+              "tuesday": true,
+              "wednesday": false,
+              "thursday": true,
+              "friday": false,
+              "saturday": false,
+              "sunday": true
+            }
+          }
+        ],
+        "backgroundColor": "#C8F7C5"
+      },
+      {
+        "uid": "9bcb0919-8d94-417f-8f35-923f509e45c2",
+        "type": "Course",
+        "title": "EMBEDDED SYSTEMS LAB",
+        "meetingTimes": [
+          {
+            "uid": "9489572b-533c-4162-bfbe-cf3fa45921f6",
+            "courseType": "Lab",
+            "instructor": "",
+            "location": "EIT-205",
+            "startHour": 13,
+            "endHour": 16,
+            "startMinute": 30,
+            "endMinute": 0,
+            "days": {
+              "monday": true,
+              "tuesday": false,
+              "wednesday": false,
+              "thursday": false,
+              "friday": false,
+              "saturday": false,
+              "sunday": false
+            }
+          }
+        ],
+        "backgroundColor": "#E08283"
+      },
+      {
+        "uid": "ee4ef40e-5f3d-499d-8d5c-7afd4bba0a65",
+        "type": "Course",
+        "title": "STATICS",
+        "meetingTimes": [
+          {
+            "uid": "9489572b-533c-4162-bfbe-cf3fa45921f6",
+            "courseType": "",
+            "instructor": "",
+            "location": "ENG-310",
+            "startHour": 13,
+            "endHour": 13,
+            "startMinute": 10,
+            "endMinute": 50,
+            "days": {
+              "monday": false,
+              "tuesday": true,
+              "wednesday": false,
+              "thursday": true,
+              "friday": false,
+              "saturday": false,
+              "sunday": true
+            }
+          }
+        ],
+        "backgroundColor": "#99CCCC"
+      },
+      {
+        "uid": "f11cd7c0-0e0d-4368-8f5a-2220b6cceb0a",
+        "type": "Course",
+        "title": "WEB DEVELOPMENT I",
+        "meetingTimes": [
+          {
+            "uid": "9489572b-533c-4162-bfbe-cf3fa45921f6",
+            "courseType": "",
+            "instructor": "",
+            "location": "EIT-010",
+            "startHour": 10,
+            "endHour": 11,
+            "startMinute": 15,
+            "endMinute": 15,
+            "days": {
+              "monday": true,
+              "tuesday": false,
+              "wednesday": true,
+              "thursday": false,
+              "friday": false,
+              "saturday": false,
+              "sunday": false
+            }
+          }
+        ],
+        "backgroundColor": "#CC99CC"
+      }
+    ]
+  }
+}
