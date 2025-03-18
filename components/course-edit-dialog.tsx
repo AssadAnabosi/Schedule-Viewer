@@ -63,7 +63,7 @@ function CourseEditDialog({
   }>({
     meetingTimes: [],
   });
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   // Reorder days based on settings.startDay
   const orderedDays = useMemo(() => {
     const days = [
@@ -427,6 +427,7 @@ function CourseEditDialog({
               </div>
               <Input
                 id="course-color"
+                className="text-md"
                 type="text"
                 value={editedCourse.backgroundColor}
                 onChange={(e) => handleColorChange(e.target.value)}
@@ -505,7 +506,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.startTime
                         ? "border-red-500"
                         : ""
@@ -527,7 +528,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.startTime
                         ? "border-red-500"
                         : ""
@@ -565,7 +566,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.endTime
                         ? "border-red-500"
                         : ""
@@ -587,7 +588,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.endTime
                         ? "border-red-500"
                         : ""
@@ -620,7 +621,7 @@ function CourseEditDialog({
                     e.target.value
                   )
                 }
-                className="col-span-3"
+                className="text-md col-span-3"
               />
             </div>
 
@@ -637,7 +638,7 @@ function CourseEditDialog({
                     e.target.value
                   )
                 }
-                className="col-span-3"
+                className="text-md col-span-3"
               />
             </div>
 
@@ -654,7 +655,7 @@ function CourseEditDialog({
                     e.target.value
                   )
                 }
-                className="col-span-3"
+                className="text-md col-span-3"
               />
             </div>
           </div>
@@ -718,6 +719,7 @@ function CourseEditDialog({
               <Input
                 id="event-color"
                 type="text"
+                className="text-md"
                 value={editedCourse.backgroundColor}
                 onChange={(e) => handleColorChange(e.target.value)}
               />
@@ -795,7 +797,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.startTime
                         ? "border-red-500"
                         : ""
@@ -817,7 +819,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.startTime
                         ? "border-red-500"
                         : ""
@@ -855,7 +857,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.endTime
                         ? "border-red-500"
                         : ""
@@ -877,7 +879,7 @@ function CourseEditDialog({
                         Number.parseInt(e.target.value)
                       )
                     }
-                    className={`w-16 ${
+                    className={`text-md w-16 ${
                       errors.meetingTimes[activeMeetingIndex]?.endTime
                         ? "border-red-500"
                         : ""
@@ -910,7 +912,7 @@ function CourseEditDialog({
                     e.target.value
                   )
                 }
-                className="col-span-3"
+                className="text-md col-span-3"
               />
             </div>
           </div>
@@ -947,7 +949,7 @@ function CourseEditDialog({
         <Button
           variant="destructive"
           onClick={handleDelete}
-          className="mr-auto"
+          className="m-0 md:mr-auto"
         >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete {activeTab === "course" ? "Course" : "Event"}
