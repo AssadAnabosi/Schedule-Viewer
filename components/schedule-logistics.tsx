@@ -63,11 +63,13 @@ export function ScheduleLogistics({
   };
 
   const handleExportToPng = async () => {
+    let originalElement = null;
+    let originalWidth = "";
+    let originalMaxWidth = "";
     try {
       setIsExporting(true);
 
-      // Get the original schedule container
-      const originalElement = document.querySelector(
+      originalElement = document.querySelector(
         "#schedule-container"
       ) as HTMLElement;
       if (!originalElement) {
@@ -75,48 +77,21 @@ export function ScheduleLogistics({
         return;
       }
 
-      // Get the background color from the --background CSS variable
+      // Force a fixed width for consistent rendering
+      originalWidth = originalElement.style.width;
+      originalElement.style.width = "1200px";
+      originalMaxWidth = originalElement.style.maxWidth;
+      originalElement.style.maxWidth = "1200px";
+
+      // Ensure fonts don't resize
+      document.body.style.zoom = "1";
+      document.documentElement.style.fontSize = "16px";
+
+      // Get the background color
       const backgroundColorHSL = getComputedStyle(document.documentElement)
         .getPropertyValue("--background")
         .trim();
 
-      // Function to convert HSL to RGB
-      const hslToRgb = (h: number, s: number, l: number) => {
-        s /= 100;
-        l /= 100;
-        const c = (1 - Math.abs(2 * l - 1)) * s;
-        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-        const m = l - c / 2;
-        let r: number, g: number, b: number;
-        if (h < 60) {
-          r = c;
-          g = x;
-          b = 0;
-        } else if (h < 120) {
-          r = x;
-          g = c;
-          b = 0;
-        } else if (h < 180) {
-          r = 0;
-          g = c;
-          b = x;
-        } else if (h < 240) {
-          r = 0;
-          g = x;
-          b = c;
-        } else if (h < 300) {
-          r = x;
-          g = 0;
-          b = c;
-        } else {
-          r = c;
-          g = 0;
-          b = x;
-        }
-        return `rgb(${Math.round((r + m) * 255)}, ${Math.round((g + m) * 255)}, ${Math.round((b + m) * 255)})`;
-      };
-
-      console.log(backgroundColorHSL);
       const hslMatch = backgroundColorHSL.match(/^(\d+)\s+(\d+)%\s+([\d.]+)%$/);
       if (!hslMatch) {
         console.error("Invalid HSL format");
@@ -127,29 +102,46 @@ export function ScheduleLogistics({
       const s = parseInt(hslMatch[2], 10);
       const l = parseInt(hslMatch[3], 10);
 
-      // Convert to RGB
+      const hslToRgb = (h: number, s: number, l: number) => {
+        s /= 100;
+        l /= 100;
+        const c = (1 - Math.abs(2 * l - 1)) * s;
+        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+        const m = l - c / 2;
+        let [r, g, b] =
+          h < 60
+            ? [c, x, 0]
+            : h < 120
+              ? [x, c, 0]
+              : h < 180
+                ? [0, c, x]
+                : h < 240
+                  ? [0, x, c]
+                  : h < 300
+                    ? [x, 0, c]
+                    : [c, 0, x];
+        return `rgb(${Math.round((r + m) * 255)}, ${Math.round((g + m) * 255)}, ${Math.round((b + m) * 255)})`;
+      };
+
       const backgroundColorRGB = hslToRgb(h, s, l);
 
-      // Create the h1 element
+      // Add title
       const h1 = document.createElement("h1");
       h1.id = "schedule-title";
       h1.innerText = title;
       h1.classList.add("mx-auto", "text-2xl", "font-bold", "mb-5");
-
       originalElement.insertBefore(h1, originalElement.firstChild);
 
-      // Use html2canvas to render the element to a canvas
+      // Capture the element
       const canvas = await html2canvas(originalElement, {
-        backgroundColor: backgroundColorRGB, // Set background color from the RGB value
-        logging: true, // Enable logging for debugging
-        scale: 2, // Scale factor for higher quality image
-        useCORS: true, // Use CORS to load external resources (images, fonts)
+        backgroundColor: backgroundColorRGB,
+        scale: window.devicePixelRatio > 1 ? 3 : 2, // Scale for higher quality
+        width: 1200, // Force fixed width
+        useCORS: true,
       });
 
-      // Get the data URL from the canvas (PNG format)
+      // Download as PNG
       const dataUrl = canvas.toDataURL("image/png");
-
-      // Create a download link for the PNG image
       const link = document.createElement("a");
       link.download = `${title.replace(/\s+/g, "_")}_schedule.png`;
       link.href = dataUrl;
@@ -157,10 +149,12 @@ export function ScheduleLogistics({
     } catch (error) {
       console.error("Error exporting schedule to PNG:", error);
     } finally {
-      // Remove the h1 element after exporting
       const h1 = document.querySelector("#schedule-title");
       if (h1) h1.remove();
-
+      if (originalElement) {
+        originalElement.style.width = originalWidth;
+        originalElement.style.maxWidth = originalMaxWidth;
+      }
       setIsExporting(false);
     }
   };
