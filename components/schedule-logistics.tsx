@@ -167,13 +167,14 @@ export function ScheduleLogistics({
 
   return (
     <div className="mb-4 flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className="flex flex-col items-start gap-2 md:flex-row">
         <Button
           variant="outline"
+          className="flex w-full justify-start gap-2 md:w-fit"
           onClick={() => document.getElementById("file-upload")?.click()}
         >
           <Upload className="mr-2 h-4 w-4" />
-          Import Schedule{" "}
+          <span>Import Schedule </span>
           <span className="text-xs text-muted-foreground">json</span>
         </Button>
         <input
@@ -183,13 +184,18 @@ export function ScheduleLogistics({
           className="hidden"
           onChange={handleFileUpload}
         />
-        <Button variant="outline" onClick={handleExport}>
+        <Button
+          variant="outline"
+          className="flex w-full justify-start gap-2 md:w-fit"
+          onClick={handleExport}
+        >
           <Download className="mr-2 h-4 w-4" />
           Export Schedule
           <span className="text-xs text-muted-foreground">json</span>
         </Button>
         <Button
           variant="outline"
+          className="flex w-full justify-start gap-2 md:w-fit"
           onClick={handleExportToPng}
           disabled={isExporting}
           title="Export as PNG"
