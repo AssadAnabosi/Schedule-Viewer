@@ -9,11 +9,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Trash2 } from "lucide-react";
 import type {
   CourseItem,
@@ -52,7 +63,7 @@ function CourseEditDialog({
   }>({
     meetingTimes: [],
   });
-
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   // Reorder days based on settings.startDay
   const orderedDays = useMemo(() => {
     const days = [
@@ -376,635 +387,601 @@ function CourseEditDialog({
 
   if (!editedCourse) return null;
 
-  return (
+  const content = (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="course">Course</TabsTrigger>
+        <TabsTrigger value="event">Event</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="course" className="mt-4">
+        <div className="grid gap-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="course-title">Course Title</Label>
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="course-title"
+                value={editedCourse.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                className={errors.title ? "border-red-500" : ""}
+                placeholder="Required"
+              />
+              {errors.title && (
+                <p className="text-xs text-red-500">• {errors.title} </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="course-color">Color</Label>
+            <div className="col-span-3 flex items-center gap-2">
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded border"
+                style={{ backgroundColor: editedCourse.backgroundColor }}
+              >
+                <div className="flex h-full w-full items-center justify-center bg-black/30">
+                  <span className="text-xs text-white">
+                    {editedCourse.backgroundColor.substring(1, 2)}
+                  </span>
+                </div>
+              </div>
+              <Input
+                id="course-color"
+                type="text"
+                value={editedCourse.backgroundColor}
+                onChange={(e) => handleColorChange(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-t-md bg-muted p-2">
+            <div className="flex items-center justify-between font-medium text-muted-foreground">
+              <div>
+                Meeting Time {activeMeetingIndex + 1}
+                {editedCourse.meetingTimes[activeMeetingIndex] && (
+                  <span className="ml-2 text-sm">
+                    {formatTimeHeader(
+                      editedCourse.meetingTimes[activeMeetingIndex]
+                    )}
+                  </span>
+                )}
+              </div>
+              {editedCourse.meetingTimes.length > 1 && (
+                <button
+                  onClick={() => handleDeleteMeetingTime(activeMeetingIndex)}
+                  className="transition-colors hover:text-red-200"
+                  type="button"
+                  aria-label="Delete meeting time"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-4 rounded-b-md p-4">
+            <div className="mb-4 grid grid-cols-7 gap-2">
+              {orderedDays.map((day) => (
+                <div key={day.key} className="flex flex-col items-center">
+                  <span className="text-xs"> {day.label} </span>
+                  <Checkbox
+                    checked={
+                      editedCourse.meetingTimes[activeMeetingIndex].days[
+                        day.key as keyof MeetingTime["days"]
+                      ]
+                    }
+                    onCheckedChange={(checked) =>
+                      handleMeetingTimeChange(activeMeetingIndex, "days", {
+                        [day.key]: !!checked,
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+
+            {errors.meetingTimes[activeMeetingIndex]?.days && (
+              <p className="text-xs text-red-500">
+                • {errors.meetingTimes[activeMeetingIndex].days}{" "}
+              </p>
+            )}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="start-time">Start Time</Label>
+              <div className="col-span-3 space-y-1">
+                <div className="flex items-center">
+                  <Input
+                    id="start-hour"
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].startHour
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "startHour",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.startTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  <span className="mx-1">: </span>
+                  <Input
+                    id="start-minute"
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].startMinute
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "startMinute",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.startTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                </div>
+                {errors.meetingTimes[activeMeetingIndex]?.startTime && (
+                  <p className="text-xs text-red-500">
+                    • {errors.meetingTimes[activeMeetingIndex].startTime}{" "}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {" "}
+                  Enter time in 24 - hour format(00 - 23){" "}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="end-time">End Time</Label>
+              <div className="col-span-3 space-y-1">
+                <div className="flex items-center">
+                  <Input
+                    id="end-hour"
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].endHour
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "endHour",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.endTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  <span className="mx-1">: </span>
+                  <Input
+                    id="end-minute"
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].endMinute
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "endMinute",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.endTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                </div>
+                {errors.meetingTimes[activeMeetingIndex]?.endTime && (
+                  <p className="text-xs text-red-500">
+                    • {errors.meetingTimes[activeMeetingIndex].endTime}{" "}
+                  </p>
+                )}
+                {errors.meetingTimes[activeMeetingIndex]?.timeOrder && (
+                  <p className="text-xs text-red-500">
+                    • {errors.meetingTimes[activeMeetingIndex].timeOrder}{" "}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="course-type">Course Type</Label>
+              <Input
+                id="course-type"
+                placeholder="Optional (ex. Lab)"
+                value={editedCourse.meetingTimes[activeMeetingIndex].courseType}
+                onChange={(e) =>
+                  handleMeetingTimeChange(
+                    activeMeetingIndex,
+                    "courseType",
+                    e.target.value
+                  )
+                }
+                className="col-span-3"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="instructor">Instructor</Label>
+              <Input
+                id="instructor"
+                placeholder="Optional"
+                value={editedCourse.meetingTimes[activeMeetingIndex].instructor}
+                onChange={(e) =>
+                  handleMeetingTimeChange(
+                    activeMeetingIndex,
+                    "instructor",
+                    e.target.value
+                  )
+                }
+                className="col-span-3"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                placeholder="Optional"
+                value={editedCourse.meetingTimes[activeMeetingIndex].location}
+                onChange={(e) =>
+                  handleMeetingTimeChange(
+                    activeMeetingIndex,
+                    "location",
+                    e.target.value
+                  )
+                }
+                className="col-span-3"
+              />
+            </div>
+          </div>
+
+          {editedCourse.meetingTimes.length > 1 && (
+            <div className="mt-2 flex justify-center gap-2">
+              {editedCourse.meetingTimes.map((_, index) => (
+                <Button
+                  key={index}
+                  variant={activeMeetingIndex === index ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveMeetingIndex(index)}
+                >
+                  {index + 1}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleAddMeetingTime}
+          >
+            Add Another Meeting Time
+          </Button>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="event" className="mt-4">
+        <div className="grid gap-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="event-name">Event Name</Label>
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="event-name"
+                value={editedCourse.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                className={errors.title ? "border-red-500" : ""}
+                placeholder="Required"
+              />
+              {errors.title && (
+                <p className="text-xs text-red-500">• {errors.title} </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="event-color">Color</Label>
+            <div className="col-span-3 flex items-center gap-2">
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded border"
+                style={{ backgroundColor: editedCourse.backgroundColor }}
+              >
+                <div className="flex h-full w-full items-center justify-center bg-black/30">
+                  <span className="text-xs text-white">
+                    {editedCourse.backgroundColor.substring(1, 2)}
+                  </span>
+                </div>
+              </div>
+              <Input
+                id="event-color"
+                type="text"
+                value={editedCourse.backgroundColor}
+                onChange={(e) => handleColorChange(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-t-md bg-muted p-2">
+            <div className="flex items-center justify-between font-medium text-muted-foreground">
+              <div>
+                Meeting Time {activeMeetingIndex + 1}
+                {editedCourse.meetingTimes[activeMeetingIndex] && (
+                  <span className="ml-2 text-sm">
+                    {formatTimeHeader(
+                      editedCourse.meetingTimes[activeMeetingIndex]
+                    )}
+                  </span>
+                )}
+              </div>
+              {editedCourse.meetingTimes.length > 1 && (
+                <button
+                  onClick={() => handleDeleteMeetingTime(activeMeetingIndex)}
+                  className="transition-colors hover:text-red-200"
+                  type="button"
+                  aria-label="Delete meeting time"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-4 rounded-b-md p-4">
+            <div className="mb-4 grid grid-cols-7 gap-2">
+              {orderedDays.map((day) => (
+                <div key={day.key} className="flex flex-col items-center">
+                  <span className="text-xs"> {day.label} </span>
+                  <Checkbox
+                    checked={
+                      editedCourse.meetingTimes[activeMeetingIndex].days[
+                        day.key as keyof MeetingTime["days"]
+                      ]
+                    }
+                    onCheckedChange={(checked) =>
+                      handleMeetingTimeChange(activeMeetingIndex, "days", {
+                        [day.key]: !!checked,
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+
+            {errors.meetingTimes[activeMeetingIndex]?.days && (
+              <p className="text-xs text-red-500">
+                • {errors.meetingTimes[activeMeetingIndex].days}{" "}
+              </p>
+            )}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="event-start-time">Start Time</Label>
+              <div className="col-span-3 space-y-1">
+                <div className="flex items-center">
+                  <Input
+                    id="event-start-hour"
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].startHour
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "startHour",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.startTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  <span className="mx-1">: </span>
+                  <Input
+                    id="event-start-minute"
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].startMinute
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "startMinute",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.startTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                </div>
+                {errors.meetingTimes[activeMeetingIndex]?.startTime && (
+                  <p className="text-xs text-red-500">
+                    • {errors.meetingTimes[activeMeetingIndex].startTime}{" "}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {" "}
+                  Enter time in 24 - hour format(00 - 23){" "}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="event-end-time">End Time</Label>
+              <div className="col-span-3 space-y-1">
+                <div className="flex items-center">
+                  <Input
+                    id="event-end-hour"
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].endHour
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "endHour",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.endTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  <span className="mx-1">: </span>
+                  <Input
+                    id="event-end-minute"
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={
+                      editedCourse.meetingTimes[activeMeetingIndex].endMinute
+                    }
+                    onChange={(e) =>
+                      handleMeetingTimeChange(
+                        activeMeetingIndex,
+                        "endMinute",
+                        Number.parseInt(e.target.value)
+                      )
+                    }
+                    className={`w-16 ${
+                      errors.meetingTimes[activeMeetingIndex]?.endTime
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                </div>
+                {errors.meetingTimes[activeMeetingIndex]?.endTime && (
+                  <p className="text-xs text-red-500">
+                    • {errors.meetingTimes[activeMeetingIndex].endTime}{" "}
+                  </p>
+                )}
+                {errors.meetingTimes[activeMeetingIndex]?.timeOrder && (
+                  <p className="text-xs text-red-500">
+                    • {errors.meetingTimes[activeMeetingIndex].timeOrder}{" "}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="event-location">Location</Label>
+              <Input
+                id="event-location"
+                placeholder="Optional"
+                value={editedCourse.meetingTimes[activeMeetingIndex].location}
+                onChange={(e) =>
+                  handleMeetingTimeChange(
+                    activeMeetingIndex,
+                    "location",
+                    e.target.value
+                  )
+                }
+                className="col-span-3"
+              />
+            </div>
+          </div>
+
+          {editedCourse.meetingTimes.length > 1 && (
+            <div className="mt-2 flex justify-center gap-2">
+              {editedCourse.meetingTimes.map((_, index) => (
+                <Button
+                  key={index}
+                  variant={activeMeetingIndex === index ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveMeetingIndex(index)}
+                >
+                  {index + 1}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleAddMeetingTime}
+          >
+            Add Another Event Time
+          </Button>
+        </div>
+      </TabsContent>
+    </Tabs>
+  );
+  const footer = (
+    <>
+      {course && onDelete && (
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          className="mr-auto"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete {activeTab === "course" ? "Course" : "Event"}
+        </Button>
+      )}
+      <Button onClick={handleSave}>
+        {course
+          ? `Edit ${activeTab === "course" ? "Course" : "Event"}`
+          : `Add ${activeTab === "course" ? "Course" : "Event"}`}
+      </Button>
+    </>
+  );
+  return isDesktop ? (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{course ? "Edit Item" : "Add Item"} </DialogTitle>
         </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="course">Course</TabsTrigger>
-            <TabsTrigger value="event">Event</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="course" className="mt-4">
-            <div className="grid gap-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="course-title" className="text-right">
-                  Course Title
-                </Label>
-                <div className="col-span-3 space-y-1">
-                  <Input
-                    id="course-title"
-                    value={editedCourse.title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    className={errors.title ? "border-red-500" : ""}
-                    placeholder="Required"
-                  />
-                  {errors.title && (
-                    <p className="text-xs text-red-500">• {errors.title} </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="course-color" className="text-right">
-                  Color
-                </Label>
-                <div className="col-span-3 flex items-center gap-2">
-                  <div
-                    className="flex h-6 w-6 items-center justify-center rounded border"
-                    style={{ backgroundColor: editedCourse.backgroundColor }}
-                  >
-                    <div className="flex h-full w-full items-center justify-center bg-black/30">
-                      <span className="text-xs text-white">
-                        {editedCourse.backgroundColor.substring(1, 2)}
-                      </span>
-                    </div>
-                  </div>
-                  <Input
-                    id="course-color"
-                    type="text"
-                    value={editedCourse.backgroundColor}
-                    onChange={(e) => handleColorChange(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-t-md bg-muted p-2">
-                <div className="flex items-center justify-between font-medium text-muted-foreground">
-                  <div>
-                    Meeting Time {activeMeetingIndex + 1}
-                    {editedCourse.meetingTimes[activeMeetingIndex] && (
-                      <span className="ml-2 text-sm">
-                        {formatTimeHeader(
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  {editedCourse.meetingTimes.length > 1 && (
-                    <button
-                      onClick={() =>
-                        handleDeleteMeetingTime(activeMeetingIndex)
-                      }
-                      className="transition-colors hover:text-red-200"
-                      type="button"
-                      aria-label="Delete meeting time"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4 rounded-b-md p-4">
-                <div className="mb-4 grid grid-cols-7 gap-2">
-                  {orderedDays.map((day) => (
-                    <div key={day.key} className="flex flex-col items-center">
-                      <span className="text-xs"> {day.label} </span>
-                      <Checkbox
-                        checked={
-                          editedCourse.meetingTimes[activeMeetingIndex].days[
-                            day.key as keyof MeetingTime["days"]
-                          ]
-                        }
-                        onCheckedChange={(checked) =>
-                          handleMeetingTimeChange(activeMeetingIndex, "days", {
-                            [day.key]: !!checked,
-                          })
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {errors.meetingTimes[activeMeetingIndex]?.days && (
-                  <p className="text-xs text-red-500">
-                    • {errors.meetingTimes[activeMeetingIndex].days}{" "}
-                  </p>
-                )}
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="start-time" className="text-right">
-                    Start Time
-                  </Label>
-                  <div className="col-span-3 space-y-1">
-                    <div className="flex items-center">
-                      <Input
-                        id="start-hour"
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                            .startHour
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "startHour",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.startTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                      <span className="mx-1">: </span>
-                      <Input
-                        id="start-minute"
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                            .startMinute
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "startMinute",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.startTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {errors.meetingTimes[activeMeetingIndex]?.startTime && (
-                      <p className="text-xs text-red-500">
-                        •{" "}
-                        {errors.meetingTimes[activeMeetingIndex].startTime}{" "}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {" "}
-                      Enter time in 24 - hour format(00 - 23){" "}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="end-time" className="text-right">
-                    End Time
-                  </Label>
-                  <div className="col-span-3 space-y-1">
-                    <div className="flex items-center">
-                      <Input
-                        id="end-hour"
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex].endHour
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "endHour",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.endTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                      <span className="mx-1">: </span>
-                      <Input
-                        id="end-minute"
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                            .endMinute
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "endMinute",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.endTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {errors.meetingTimes[activeMeetingIndex]?.endTime && (
-                      <p className="text-xs text-red-500">
-                        • {errors.meetingTimes[activeMeetingIndex].endTime}{" "}
-                      </p>
-                    )}
-                    {errors.meetingTimes[activeMeetingIndex]?.timeOrder && (
-                      <p className="text-xs text-red-500">
-                        •{" "}
-                        {errors.meetingTimes[activeMeetingIndex].timeOrder}{" "}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="course-type" className="text-right">
-                    Course Type
-                  </Label>
-                  <Input
-                    id="course-type"
-                    placeholder="Optional (ex. Lab)"
-                    value={
-                      editedCourse.meetingTimes[activeMeetingIndex].courseType
-                    }
-                    onChange={(e) =>
-                      handleMeetingTimeChange(
-                        activeMeetingIndex,
-                        "courseType",
-                        e.target.value
-                      )
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="instructor" className="text-right">
-                    Instructor
-                  </Label>
-                  <Input
-                    id="instructor"
-                    placeholder="Optional"
-                    value={
-                      editedCourse.meetingTimes[activeMeetingIndex].instructor
-                    }
-                    onChange={(e) =>
-                      handleMeetingTimeChange(
-                        activeMeetingIndex,
-                        "instructor",
-                        e.target.value
-                      )
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="location" className="text-right">
-                    Location
-                  </Label>
-                  <Input
-                    id="location"
-                    placeholder="Optional"
-                    value={
-                      editedCourse.meetingTimes[activeMeetingIndex].location
-                    }
-                    onChange={(e) =>
-                      handleMeetingTimeChange(
-                        activeMeetingIndex,
-                        "location",
-                        e.target.value
-                      )
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-
-              {editedCourse.meetingTimes.length > 1 && (
-                <div className="mt-2 flex justify-center gap-2">
-                  {editedCourse.meetingTimes.map((_, index) => (
-                    <Button
-                      key={index}
-                      variant={
-                        activeMeetingIndex === index ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setActiveMeetingIndex(index)}
-                    >
-                      {index + 1}
-                    </Button>
-                  ))}
-                </div>
-              )}
-
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleAddMeetingTime}
-              >
-                Add Another Meeting Time
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="event" className="mt-4">
-            <div className="grid gap-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="event-name" className="text-right">
-                  Event Name
-                </Label>
-                <div className="col-span-3 space-y-1">
-                  <Input
-                    id="event-name"
-                    value={editedCourse.title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    className={errors.title ? "border-red-500" : ""}
-                    placeholder="Required"
-                  />
-                  {errors.title && (
-                    <p className="text-xs text-red-500">• {errors.title} </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="event-color" className="text-right">
-                  Color
-                </Label>
-                <div className="col-span-3 flex items-center gap-2">
-                  <div
-                    className="flex h-6 w-6 items-center justify-center rounded border"
-                    style={{ backgroundColor: editedCourse.backgroundColor }}
-                  >
-                    <div className="flex h-full w-full items-center justify-center bg-black/30">
-                      <span className="text-xs text-white">
-                        {editedCourse.backgroundColor.substring(1, 2)}
-                      </span>
-                    </div>
-                  </div>
-                  <Input
-                    id="event-color"
-                    type="text"
-                    value={editedCourse.backgroundColor}
-                    onChange={(e) => handleColorChange(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-t-md bg-muted p-2">
-                <div className="flex items-center justify-between font-medium text-muted-foreground">
-                  <div>
-                    Meeting Time {activeMeetingIndex + 1}
-                    {editedCourse.meetingTimes[activeMeetingIndex] && (
-                      <span className="ml-2 text-sm">
-                        {formatTimeHeader(
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  {editedCourse.meetingTimes.length > 1 && (
-                    <button
-                      onClick={() =>
-                        handleDeleteMeetingTime(activeMeetingIndex)
-                      }
-                      className="transition-colors hover:text-red-200"
-                      type="button"
-                      aria-label="Delete meeting time"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4 rounded-b-md p-4">
-                <div className="mb-4 grid grid-cols-7 gap-2">
-                  {orderedDays.map((day) => (
-                    <div key={day.key} className="flex flex-col items-center">
-                      <span className="text-xs"> {day.label} </span>
-                      <Checkbox
-                        checked={
-                          editedCourse.meetingTimes[activeMeetingIndex].days[
-                            day.key as keyof MeetingTime["days"]
-                          ]
-                        }
-                        onCheckedChange={(checked) =>
-                          handleMeetingTimeChange(activeMeetingIndex, "days", {
-                            [day.key]: !!checked,
-                          })
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {errors.meetingTimes[activeMeetingIndex]?.days && (
-                  <p className="text-xs text-red-500">
-                    • {errors.meetingTimes[activeMeetingIndex].days}{" "}
-                  </p>
-                )}
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="event-start-time" className="text-right">
-                    Start Time
-                  </Label>
-                  <div className="col-span-3 space-y-1">
-                    <div className="flex items-center">
-                      <Input
-                        id="event-start-hour"
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                            .startHour
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "startHour",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.startTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                      <span className="mx-1">: </span>
-                      <Input
-                        id="event-start-minute"
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                            .startMinute
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "startMinute",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.startTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {errors.meetingTimes[activeMeetingIndex]?.startTime && (
-                      <p className="text-xs text-red-500">
-                        •{" "}
-                        {errors.meetingTimes[activeMeetingIndex].startTime}{" "}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {" "}
-                      Enter time in 24 - hour format(00 - 23){" "}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="event-end-time" className="text-right">
-                    End Time
-                  </Label>
-                  <div className="col-span-3 space-y-1">
-                    <div className="flex items-center">
-                      <Input
-                        id="event-end-hour"
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex].endHour
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "endHour",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.endTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                      <span className="mx-1">: </span>
-                      <Input
-                        id="event-end-minute"
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={
-                          editedCourse.meetingTimes[activeMeetingIndex]
-                            .endMinute
-                        }
-                        onChange={(e) =>
-                          handleMeetingTimeChange(
-                            activeMeetingIndex,
-                            "endMinute",
-                            Number.parseInt(e.target.value)
-                          )
-                        }
-                        className={`w-16 ${
-                          errors.meetingTimes[activeMeetingIndex]?.endTime
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {errors.meetingTimes[activeMeetingIndex]?.endTime && (
-                      <p className="text-xs text-red-500">
-                        • {errors.meetingTimes[activeMeetingIndex].endTime}{" "}
-                      </p>
-                    )}
-                    {errors.meetingTimes[activeMeetingIndex]?.timeOrder && (
-                      <p className="text-xs text-red-500">
-                        •{" "}
-                        {errors.meetingTimes[activeMeetingIndex].timeOrder}{" "}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="event-location" className="text-right">
-                    Location
-                  </Label>
-                  <Input
-                    id="event-location"
-                    placeholder="Optional"
-                    value={
-                      editedCourse.meetingTimes[activeMeetingIndex].location
-                    }
-                    onChange={(e) =>
-                      handleMeetingTimeChange(
-                        activeMeetingIndex,
-                        "location",
-                        e.target.value
-                      )
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-
-              {editedCourse.meetingTimes.length > 1 && (
-                <div className="mt-2 flex justify-center gap-2">
-                  {editedCourse.meetingTimes.map((_, index) => (
-                    <Button
-                      key={index}
-                      variant={
-                        activeMeetingIndex === index ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setActiveMeetingIndex(index)}
-                    >
-                      {index + 1}
-                    </Button>
-                  ))}
-                </div>
-              )}
-
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleAddMeetingTime}
-              >
-                Add Another Event Time
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <DialogFooter className="flex justify-between">
-          {course && onDelete && (
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              className="mr-auto"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete {activeTab === "course" ? "Course" : "Event"}
-            </Button>
-          )}
-          <Button onClick={handleSave}>
-            {course
-              ? `Edit ${activeTab === "course" ? "Course" : "Event"}`
-              : `Add ${activeTab === "course" ? "Course" : "Event"}`}
-          </Button>
-        </DialogFooter>
+        {content}
+        <DialogFooter className="flex justify-between">{footer}</DialogFooter>
       </DialogContent>
     </Dialog>
+  ) : (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeader className="pt-6">
+          <DrawerTitle>{course ? "Edit Item" : "Add Item"}</DrawerTitle>
+        </DrawerHeader>
+        <ScrollArea className="overflow-y-auto">
+          {content}
+          <DrawerFooter>{footer}</DrawerFooter>
+        </ScrollArea>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
