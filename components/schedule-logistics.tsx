@@ -63,13 +63,11 @@ export function ScheduleLogistics({
   };
 
   const handleExportToPng = async () => {
-    let originalElement = null;
-    let originalWidth = "";
-    let originalMaxWidth = "";
+    let clonedElement: HTMLElement | null = null;
     try {
       setIsExporting(true);
 
-      originalElement = document.querySelector(
+      const originalElement = document.querySelector(
         "#schedule-container"
       ) as HTMLElement;
       if (!originalElement) {
@@ -77,11 +75,12 @@ export function ScheduleLogistics({
         return;
       }
 
-      // Force a fixed width for consistent rendering
-      originalWidth = originalElement.style.width;
-      originalElement.style.width = "1600px";
-      originalMaxWidth = originalElement.style.maxWidth;
-      originalElement.style.maxWidth = "1600px";
+      // Clone the original element
+      clonedElement = originalElement.cloneNode(true) as HTMLElement;
+      clonedElement.style.width = "1600px"; // Set a fixed width for export
+      clonedElement.style.left = "-9999px"; // Move it out of the viewport
+
+      document.body.appendChild(clonedElement); // Add to the DOM temporarily
 
       // Ensure fonts don't resize
       document.body.style.zoom = "1";
@@ -127,18 +126,19 @@ export function ScheduleLogistics({
 
       // Add title
       const h1 = document.createElement("h1");
-      h1.id = "schedule-title";
       h1.innerText = title;
       h1.classList.add("mx-auto", "text-2xl", "font-bold", "mb-5");
-      originalElement.insertBefore(h1, originalElement.firstChild);
+      clonedElement.insertBefore(h1, clonedElement.firstChild);
 
       // Capture the element
-      const canvas = await html2canvas(originalElement, {
+      const canvas = await html2canvas(clonedElement, {
         backgroundColor: backgroundColorRGB,
         scale: window.devicePixelRatio > 1 ? 3 : 2, // Scale for higher quality
         width: 1600, // Force fixed width
         useCORS: true,
       });
+
+      document.body.removeChild(clonedElement);
 
       // Download as PNG
       const dataUrl = canvas.toDataURL("image/png");
@@ -149,12 +149,6 @@ export function ScheduleLogistics({
     } catch (error) {
       console.error("Error exporting schedule to PNG:", error);
     } finally {
-      const h1 = document.querySelector("#schedule-title");
-      if (h1) h1.remove();
-      if (originalElement) {
-        originalElement.style.width = originalWidth;
-        originalElement.style.maxWidth = originalMaxWidth;
-      }
       setIsExporting(false);
     }
   };
