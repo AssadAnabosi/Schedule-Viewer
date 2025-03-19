@@ -79,9 +79,9 @@ export function ScheduleLogistics({
 
       // Force a fixed width for consistent rendering
       originalWidth = originalElement.style.width;
-      originalElement.style.width = "1200px";
+      originalElement.style.width = "1600px";
       originalMaxWidth = originalElement.style.maxWidth;
-      originalElement.style.maxWidth = "1200px";
+      originalElement.style.maxWidth = "1600px";
 
       // Ensure fonts don't resize
       document.body.style.zoom = "1";
@@ -136,7 +136,7 @@ export function ScheduleLogistics({
       const canvas = await html2canvas(originalElement, {
         backgroundColor: backgroundColorRGB,
         scale: window.devicePixelRatio > 1 ? 3 : 2, // Scale for higher quality
-        width: 1200, // Force fixed width
+        width: 1600, // Force fixed width
         useCORS: true,
       });
 
