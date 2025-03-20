@@ -39,6 +39,7 @@ interface CourseEditDialogProps {
   onSave: (course: CourseItem) => void;
   onDelete?: (courseId: string) => void;
   settings: ScheduleSettings;
+  currentUsedColors?: string[];
 }
 
 function CourseEditDialog({
@@ -48,6 +49,7 @@ function CourseEditDialog({
   onSave,
   onDelete,
   settings,
+  currentUsedColors,
 }: CourseEditDialogProps) {
   const [editedCourse, setEditedCourse] = useState<CourseItem | null>(null);
   const [activeTab, setActiveTab] = useState<string>("course");
@@ -131,8 +133,20 @@ function CourseEditDialog({
       "#CC99CC", // Purple
       "#FFCC99", // Orange
       "#99CCFF", // Light Blue
+      "#FFD700", // Gold
+      "#FF69B4", // Hot Pink
+      "#8A2BE2", // Blue Violet
     ];
-    return colors[Math.floor(Math.random() * colors.length)];
+
+    const availableColors = currentUsedColors
+      ? colors.filter((color) => !currentUsedColors.includes(color))
+      : colors;
+
+    if (availableColors.length === 0) {
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    return availableColors[Math.floor(Math.random() * availableColors.length)];
   };
 
   const handleTitleChange = (value: string) => {

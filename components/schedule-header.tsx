@@ -15,6 +15,7 @@ interface ScheduleHeaderProps {
   settings: ScheduleSettings;
   onSettingsChange: (settings: ScheduleSettings) => void;
   onAddCourse: (course: CourseItem) => void;
+  currentUsedColors: string[];
 }
 
 export function ScheduleHeader({
@@ -23,6 +24,7 @@ export function ScheduleHeader({
   settings,
   onSettingsChange,
   onAddCourse,
+  currentUsedColors,
 }: ScheduleHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
@@ -100,6 +102,7 @@ export function ScheduleHeader({
         course={null}
         onSave={handleAddCourse}
         settings={settings}
+        currentUsedColors={currentUsedColors}
       />
     </div>
   );

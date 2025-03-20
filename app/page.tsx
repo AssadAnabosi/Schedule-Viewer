@@ -133,6 +133,9 @@ export default function Home() {
     <main className="container mx-auto p-4">
       <ScheduleHeader
         title={scheduleData.schedule.title}
+        currentUsedColors={scheduleData.schedule.items.map(
+          (item) => item.backgroundColor
+        )}
         onTitleChange={handleTitleChange}
         settings={settings}
         onSettingsChange={handleSettingsChange}
