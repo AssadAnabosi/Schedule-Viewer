@@ -7,6 +7,8 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Static export for GitHub Pages (output goes to ./out)
+  output: "export",
   eslint: {
     ignoreDuringBuilds: true,
   },
